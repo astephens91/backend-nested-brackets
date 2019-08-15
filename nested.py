@@ -1,66 +1,64 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+
+
 """
-Module docstring: One line description of what your program does.
+App that checks for properly nested brackets and writes a YES or NO depending on the validity of nested bracket
 """
 __author__ = "astephens91"
 
 import sys
-
-def areBracketsNestedCorreclty(filename):
-    fwrite = open("output.txt", "a+")
-    
-    fread = open(filename, "r")
-    text =fread.read()
-    
-    stack = []
-
-
-    for i in range(len(text)):
-        if text[i] == '(' and text[i+1] == '*':
-            stack.append(text[i] + text[i+1])
-        elif (text[i] == '(' or text[i] == '[' or text[i] == '{'):
-            stack.append(text[i])
-            continue
-            
-        if (len(stack) == 0):
-            fwrite.write("YES" + "\n")
-        
-        if text[i] == '*' and text[i+1] == ')':
-            x = stack.pop()
-
-            if (x == '(' or x == '[' or x == '{'):
-                fwrite.write("NO " + str(text.index(text[i])) + "\n")
-
-        elif text[i] == ')' and text[i-1] != '*':
-            x = stack.pop()
-        
-            if (x == '{' or x == '[' or x =='(*'):
-                fwrite.write("NO " + str(text.index(text[i])) + "\n")
-        
-        elif text[i] == '}':
-            x = stack.pop()
-            
-            if (x == '(' or x == '[' or x== '(*'):
-                fwrite.write("NO " + str(text.index(text[i])) + "\n")
-        
-        elif text[i] == ']':
-            x = stack.pop()
-
-            if (x == '(' or x == '{' or x == '(*'):
-                fwrite.write("NO " + str(text.index(text[i])) + "\n")
-    if len(stack):
-        fwrite.write("YES" + "\n")
-    
-    
-
-
+   
+def read_input(filename):
+    with open(filename, 'r') as f:
+        text= f.read().split("\n")
+    return text
 
 
 def main(args):
-   
-    areBracketsNestedCorreclty("input.txt")
-    """Add your code here"""
+    
+    bracket_dictionary = {')':'(','}':'{',']':'[','>':'<','*)':'(*'} 
+    
+    stack = []
+    i = 0
+    
+    closing_brackets = bracket_dictionary.keys()
+    opening_brackets = bracket_dictionary.values()
+    listed = list(args)
+    skip = False
+    for index, x in enumerate(listed):
+        if skip:
+            skip = False
+            continue
+        else:
+            if index != len(listed) - 1:    
+                if x == '(' and listed[index + 1] == '*':
+                    x = '(*'
+                    skip = True
+                elif x == '*' and listed[index + 1] == ')':
+                    x = '*)'
+                    skip = True
+            if x in opening_brackets:
+                stack.append(x)
+                i += 1
+            elif x in closing_brackets:  
+                i += 1
+                if stack[-1] == bracket_dictionary[x]:
+                    stack.pop()
+                else:
+                    return "NO " + str(i)
+            else:
+                i += 1
+    if len(stack) == 0:
+        return "YES"
+    else:
+        i += 1
+        return "NO " + str(i)
+            
+def write_output():
+    
+    read_output = read_input("input.txt")
+    with open("output.txt", "w+") as f:
+        for text in read_output:
+            f.write(main(text) + "\n") 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    write_output()
